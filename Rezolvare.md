@@ -30,7 +30,25 @@ Câteva dintre `regulile algoritmilor de rutare` sunt: *`toate nodurile sunt la 
 
 - ### **`Link State Routing`**
 
+  - Este o tehnica de rutare prin care orice router aflat in reteaua de internet isi imparte informatiile cu celelalte routere vecine.
 
+  - Nodurile/Routerele isi cunosc doar costurile drumurilor dintre ele si vecinii lor.
+
+   - In comunicarea cu cu celelalte noduri, routerele pot oferi doar informatii despre costul pana la vecinii lor, folosindu-se de mesaje.
+
+  - Este necesar ca fiecare nod sa ruleze acelasi algoritm pentru a putea comunica.
+
+  - Este posibil ca informatiile sa fie pierdute in timpul comunicarii.
+
+  - In momentul punerii in functiune a unui router, acesta isi calculeaza costurile pana la vecinii sai, urmand ca aceste informatii sa fie trimise catre toate routerele vecine.
+
+  - In timpul functionarii unui router, daca se schimba costul pana la unul din vecini, acesta retrimite un nou set de informatii actualizate tuturor vecinilor.
+
+  - In urma acestui schimb de informatii "din aproape in aproape", fiecare router va fi capabil sa-si construiasca propria topologie/"harta" care va contine toate nodurile disponibile in acel moment in reteaua de internet, precum si costurile dintre fiecare 2 routere.
+
+  - Fiecare router va folosi algoritmul lui Dijkstra pentru a afla rutele optime catre orice nod.
+  
+  - Datorita caracterului iterativ al algoritmului lui Dijkstra, este de ajuns calcularea distantelor pana la atingerea sursei.
 
 - ### **`Distance Vector Routing`**
 
@@ -49,6 +67,20 @@ Astăzi în practică protocoalele care utilizează algoritmul `link-state` sunt
 
 - ### **`Routing Information Protocol`**
 
+  - Unul dintre cele mai vechi protocoale de rutare. Este de tip distance vector.
+
+  - Foloseste ca metrica de rutare numarul de pasi (hops).
+
+  - Previne buclele de rutare prin setarea unui numar maxim de pasi de la sursa la destinatie. In general limita este setata la 15 pasi. Un drum de 16 pasi este considerat de lungime infinita. 
+
+  - In primii ani de functionare, fiecare router capabil RIP transmitea la fiecare 30 de secunde tabela de rutare, fiind mult mai mici decat in prezent.
+
+  - Un timeout de 180 de secunde rezulta in eliminarea unui router din topologie (failures).
+
+  - Foloseste UDP ca protocol de transport si ii este atribuit portul 520.
+
+  - Foloseste mecanisme pentru prevenirea propagarii de informatii incorecte (Split horizon, Route poisoning, holddown)
+
 - ### **`Open Shortest Path First`**
 
 `Open Shortest Path First(OSPF)` este un protocol care utilizează algoritmul `link-state routing(LSR)` și este un protocol intradomain routing (`interior gateway protocol`), adică este creat să funcționeze într-un sistem autonom. Ceea ce face OSPF este să reprezinte rețeaua reală ca un graf și apoi să folosească algoritmul link-state pentru ca fiecare router să calculeze cea mai scurtă cale de la sine la toate celelalte noduri. Se pot găsi mai multe căi care sunt la fel de scurte. În acest caz, OSPF își amintește setul de trasee cele mai scurte și în timpul redirecționării pachetelor, traficul este împărțit între ele, ceea ce ajuta la echilibrarea sarcinii transmise (`Equal Cost MultiPath – ECMP`).
@@ -56,3 +88,17 @@ Acesta este un protocol open source fiind extrem de utilizat în acest moment, m
 
 
 - ### **`Border Gateway Protocol Routing`**
+
+  - Este un protocol de rutare bazat pe path-vector si pe politicile de rutare ale sistemelui autonom (AS) din care face parte
+
+  - AS-urile influenteaza in mod direct calea pachetelor catre destinatie deoarece routerele comunica intre ele prin announcements-uri. Acestea din urma contin informatii cu privire la destinatie(prefix), istoricul drumului (Path vector) si urmatorul hop(router) prin care pachetul ar trebui sa isi continuie drumul. Toate aceste informatii sunt folosite pentru a respecta politica AS-ului dar si pentru a evita o eventuala bucla prin verificarea path vectorului.
+
+  - Se poate asigura astfel un drum optim catre destinatie, bazat pe informatiile detinute de fiecare router si gestionate de AS-uri.
+
+  - In general utilizarea BGP implica increderea in informatiile oferite de fiecare router.
+
+  - In general, sistemele autonome (AS) apartin ISP-urilor sau marilor organizatii high-tech. Pentru a nu exista exploit-uri, AS-urile care doresc sa foloseasca BGP in comunicarea cu alte AS-uri (in mod extern - eBGP) au nevoie de un ASN (Autonomous System Number) emis de catre autoritatea IANA. Exista totusi exceptii notabile care au dus la o rutare a traficului deficitara.
+ [BGP can break the Internet](https://www.cloudflare.com/learning/security/glossary/what-is-bgp/).
+ Acest lucru se poate intampla atunci cand un AS anunta rute gresite (nu neaparat accidental) pe care routerele le vor crede de incredere si vor ruta traficul in acea directie.
+
+  - Spre deosebire de celelalte protocoale de rutare, stabilește și menține conexiuni între routerele vecine folosind protocolul TCP. În cazul routerelor aflate în AS-uri diferite, o conexiune BGP poate fi stabilită doar dacă routerele sunt direct conectate. Legătura se realizează pe portul TCP 179, fiind menținută prin mesaje periodice de 19 octeți (intervalul implicit este de 60 de secunde).
